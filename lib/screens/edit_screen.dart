@@ -7,6 +7,7 @@ import '../constants/app_colors_path.dart';
 class EditScreen extends StatelessWidget {
   final titleController = TextEditingController();
   final detailController = TextEditingController();
+
   EditScreen({super.key});
 
   @override
@@ -14,6 +15,7 @@ class EditScreen extends StatelessWidget {
     final args = ModalRoute.of(context)!.settings.arguments as Map?;
     titleController.text = args?['title'] ?? '';
     detailController.text = args?['detail'] ?? '';
+
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: AppColorsPath.white, size: 35),
@@ -45,9 +47,8 @@ class EditScreen extends StatelessWidget {
             ),
             SizedBox(height: 54),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // Nút Update
                 GestureDetector(
                   onTap: () {
                     String title = titleController.text.trim();
@@ -58,7 +59,11 @@ class EditScreen extends StatelessWidget {
                         SnackBar(
                           content: Row(
                             children: [
-                              Icon(Icons.error_outline, color: Colors.white, size: 28),
+                              Icon(
+                                Icons.error_outline,
+                                color: Colors.white,
+                                size: 28,
+                              ),
                               SizedBox(width: 12),
                               Expanded(
                                 child: Text(
@@ -77,17 +82,25 @@ class EditScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          margin: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
                           duration: Duration(seconds: 2),
                         ),
                       );
                       return;
                     }
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Row(
                           children: [
-                            Icon(Icons.check_circle, color: Colors.white, size: 28),
+                            Icon(
+                              Icons.check_circle,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                             SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -106,57 +119,54 @@ class EditScreen extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        margin: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
                         duration: Duration(seconds: 2),
                       ),
                     );
                   },
-
+                  child: Container(
+                    width: 170,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: AppColorsPath.purple,
+                    ),
+                    child: Center(
+                      child: AppText(
+                        content: "Update",
+                        style: AppTextStyle.text24SemiBold.copyWith(
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                 Padding(
-                   padding: const EdgeInsets.symmetric(horizontal: 14),
-                   child: Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                     children: [
-                       Container(
-                        width: 170,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: AppColorsPath.purple,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: 170,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: AppColorsPath.purple,
+                    ),
+                    child: Center(
+                      child: AppText(
+                        content: "Cancel",
+                        style: AppTextStyle.text24SemiBold.copyWith(
+                          fontSize: 20,
                         ),
-                        child: Center(
-                          child: AppText(
-                            content: "Update",
-                            style: AppTextStyle.text24SemiBold.copyWith(fontSize: 20),
-                          ),
-                        ),
-                                       ),
-                       GestureDetector(
-                         onTap: () {
-                           Navigator.pop(context);
-                         },
-                         child: Container(
-                           width: 170,
-                           height: 70,
-                           decoration: BoxDecoration(
-                             borderRadius: BorderRadius.circular(15),
-                             color: AppColorsPath.purple,
-                           ),
-                           child: Center(
-                             child: AppText(
-                               content: "Cancel",
-                               style: AppTextStyle.text24SemiBold.copyWith(fontSize: 20),
-                             ),
-                           ),
-                         ),
-                       ),
-                     ],
-                   ),
-                 ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            SizedBox(height: 54),
           ],
         ),
       ),

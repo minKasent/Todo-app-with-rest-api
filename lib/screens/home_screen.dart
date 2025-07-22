@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app_with_rest_api/components/app_text.dart';
 import 'package:todo_app_with_rest_api/components/app_text_style.dart';
-import 'package:todo_app_with_rest_api/screens/add_screen.dart';
 
 import '../constants/app_colors_path.dart';
 
@@ -50,47 +49,41 @@ class HomeScreen extends StatelessWidget {
               ),
               padding: EdgeInsets.only(left: 19,top: 22,right: 30),
               height: 82,
-              child: Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      AppText(content: "TODO TITLE",style: AppTextStyle.text13Semibold),
+                      SizedBox(height: 5,),
+                      AppText(content: "TODO SUB TITLE",style: AppTextStyle.text10Regular,)
+                    ],
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(bottom: 15),
+                    width: 130,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        AppText(content: "TODO TITLE",style: AppTextStyle.text13Semibold),
-                        SizedBox(height: 5,),
-                        AppText(content: "TODO SUB TITLE",style: AppTextStyle.text10Regular,)
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context,
+                                  '/edit',
+                                  arguments: {
+                                    'title': 'todoTitle',
+                                    'detail': 'todoDetail '
+                                  }
+                              );
+                            },
+                            child: Icon(Icons.edit,color: AppColorsPath.lighPurple,)),
+                        Icon(Icons.delete_outline,color: AppColorsPath.lighPurple,),
+                        Icon(Icons.check_circle_outline,color: AppColorsPath.lighPurple,),
                       ],
                     ),
-                    Container(
-                      padding: EdgeInsets.only(bottom: 15),
-                      width: 130,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                              onTap: () {
-                                Navigator.pushNamed(context,
-                                    '/edit',
-                                    arguments: {
-                                      'title': 'todoTitle',
-                                      'detail': 'todoDetail '
-                                    }
-                                );
-                              },
-                              child: Icon(Icons.edit,color: AppColorsPath.lighPurple,)),
-                          Icon(Icons.delete_outline,color: AppColorsPath.lighPurple,),
-                          GestureDetector(
-                              onTap: (){
-                                Navigator.pushNamed(context, '/complete');
-                              },
-                              child: Icon(Icons.check_circle_outline,color: AppColorsPath.lighPurple,)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -101,7 +94,7 @@ class HomeScreen extends StatelessWidget {
           Navigator.pushNamed(context, '/add');
         },
         backgroundColor: AppColorsPath.purple,
-        child: Icon(Icons.add, color: AppColorsPath.white, size: 30),
+        child: Icon(Icons.add, color: AppColorsPath.white, size: 35),
       ),
       bottomNavigationBar: Container(
         height: 68,
@@ -123,11 +116,16 @@ class HomeScreen extends StatelessWidget {
                  AppText(content: "All",style: AppTextStyle.text10Regular.copyWith(color: AppColorsPath.purple),),
                ],
              ),
-              Column(
-                children: [
-                  Icon(Icons.check,color: AppColorsPath.purple,size: 30,),
-                  AppText(content: "Completed",style: AppTextStyle.text10Regular.copyWith(color: AppColorsPath.purple),),
-                ],
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/complete');
+                },
+                child: Column(
+                  children: [
+                    Icon(Icons.check,color: AppColorsPath.purple,size: 30,),
+                    AppText(content: "Completed",style: AppTextStyle.text10Regular.copyWith(color: AppColorsPath.purple),),
+                  ],
+                ),
               ),
             ],
           ),
