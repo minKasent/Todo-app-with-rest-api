@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app_with_rest_api/screens/add_screen.dart';
-import 'package:todo_app_with_rest_api/screens/completed_screen.dart';
-import 'package:todo_app_with_rest_api/screens/edit_screen.dart';
-
-import 'screens/home_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_app_with_rest_api/providers/demo_provider.dart';
+import 'package:todo_app_with_rest_api/screens/demo_provider_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => DemoProvider())],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -18,15 +21,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      initialRoute: '/',
-      routes: {
-        '/': (context) =>  HomeScreen(),
-        '/add': (context) =>  AddScreen(),
-        '/edit': (context) =>  EditScreen(),
-        '/complete': (context) =>  CompletedScreen(),
-      },
+      // initialRoute: AppRoutes.home,
+      // routes: AppRoutes.routes,
+      home: DemoProviderScreen(),
       theme: ThemeData(
-
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
     );
