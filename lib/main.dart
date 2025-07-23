@@ -4,7 +4,14 @@ import 'package:todo_app_with_rest_api/routes/app_routes.dart';
 void main() {
   runApp(const MyApp());
 }
-
+// void main() {
+//   runApp(
+//     MultiProvider(
+//       providers: [ChangeNotifierProvider(create: (_) => DemoProvider())],
+//       child: const MyApp(),
+//     ),
+//   );
+// }
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -17,6 +24,7 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoutes.home,
       routes:
         AppRoutes.routes ,
+      // home: DemoProviderScreen(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
