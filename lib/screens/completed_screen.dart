@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app_with_rest_api/components/app_text.dart';
+import 'package:todo_app_with_rest_api/components/app_text_style.dart';
+import 'package:todo_app_with_rest_api/constants/app_colors_path.dart';
+import 'package:todo_app_with_rest_api/screens/widgets/appbar_widget.dart';
 
-import '../components/app_text.dart';
-import '../components/app_text_style.dart';
-import '../constants/app_colors_path.dart';
 
 class CompletedScreen extends StatelessWidget {
   const CompletedScreen({super.key});
@@ -11,18 +12,7 @@ class CompletedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColorsPath.lightWhite,
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: AppColorsPath.white, size: 35),
-        toolbarHeight: 90,
-        backgroundColor: AppColorsPath.purple,
-        title: Padding(
-          padding: EdgeInsets.only(right: 15, left: 8),
-          child: AppText(
-            style: AppTextStyle.text24SemiBold,
-            content: 'Completed Task',
-          ),
-        ),
-      ),
+      appBar: AppbarWidget(content: "Completed Task"),
       body: Padding(
         padding: const EdgeInsets.only(right: 7, top: 22, left: 7),
         child: Column(
