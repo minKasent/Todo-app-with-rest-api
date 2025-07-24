@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app_with_rest_api/components/app_text.dart';
 import 'package:todo_app_with_rest_api/components/app_text_style.dart';
 import 'package:todo_app_with_rest_api/constants/app_colors_path.dart';
 import 'package:todo_app_with_rest_api/constants/app_icons_path.dart';
+import 'package:todo_app_with_rest_api/models/task.dart';
+import 'package:todo_app_with_rest_api/provider/task_provider.dart';
 import 'package:todo_app_with_rest_api/routes/app_routes.dart';
 import 'package:todo_app_with_rest_api/screens/widgets/bottom_navigation_bar_widget.dart';
 import 'package:todo_app_with_rest_api/screens/widgets/floating_action_button_widget.dart';
@@ -16,13 +19,19 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
+  void initState() {
+    super.initState();
+    context.read<TaskProvider>().loadTasks();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColorsPath.lightWhite,
       appBar: _buildAppBarWidget(),
       body: Padding(
         padding: const EdgeInsets.only(right: 7, top: 22, left: 7),
-        child: Column(children: [_buildTaskItemWidget()]),
+        child: Column(children: [Expanded(child: _buildListTasksWidget())]),
       ),
       floatingActionButton: FloatingActionButtonWidget(),
       bottomNavigationBar: BottomNavigationBarWidget(),
@@ -51,39 +60,60 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Container _buildTaskItemWidget() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColorsPath.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: AppColorsPath.dark.withValues(alpha: 0.25),
-            blurRadius: 4,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.only(left: 19, top: 20, bottom: 20, right: 25),
-      child: Row(
-        children: [
-          Column(
-            children: [
-              AppText(
-                content: "TODO TITLE",
-                style: AppTextStyle.text13Semibold,
+  Selector _buildListTasksWidget() {
+    return Selector<TaskProvider, List<Task>>(
+      builder: (_, data, __) {
+        return ListView.separated(
+          separatorBuilder: (context, index) => SizedBox(height: 21),
+          itemCount: data.length,
+          padding: EdgeInsets.only(bottom: 30),
+          itemBuilder: (context, index) {
+            final task = data[index];
+            return Container(
+              decoration: BoxDecoration(
+                color: AppColorsPath.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColorsPath.dark.withValues(alpha: 0.25),
+                    blurRadius: 4,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
-              SizedBox(height: 5),
-              AppText(
-                content: "TODO SUB TITLE",
-                style: AppTextStyle.text10Regular,
+              padding: EdgeInsets.only(
+                left: 19,
+                top: 20,
+                bottom: 20,
+                right: 25,
               ),
-            ],
-          ),
-          const Spacer(),
-          ..._buildListIconsWidget(),
-        ],
-      ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppText(
+                          content: task.title,
+                          style: AppTextStyle.text13Semibold,
+                        ),
+                        SizedBox(height: 5),
+                        AppText(
+                          content: task.description,
+                          style: AppTextStyle.text10Regular,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  ..._buildListIconsWidget(),
+                ],
+              ),
+            );
+          },
+        );
+      },
+      selector: (_, taskProvider) => taskProvider.pendingTasks,
     );
   }
 
@@ -128,24 +158,27 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showDeleteDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Delete confirmation'),
-        content: Text('Are you sure you want to delete this task?'),
-        actions: [
-          TextButton(
-            child: Text('Cancel', style: TextStyle(color: Colors.grey)),
-            onPressed: () => Navigator.of(context).pop(),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Delete confirmation'),
+            content: Text('Are you sure you want to delete this task?'),
+            actions: [
+              TextButton(
+                child: Text('Cancel', style: TextStyle(color: Colors.grey)),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              TextButton(
+                child: Text('Delete', style: TextStyle(color: Colors.red)),
+                onPressed: () {
+                  /// TODO : Handle delete action here
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
-          TextButton(
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
-            onPressed: () {
-              /// TODO : Handle delete action here
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
     );
   }
 }

@@ -1,0 +1,54 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:todo_app_with_rest_api/models/task.dart';
+import 'package:http/http.dart' as http;
+
+class ApiService {
+  static const String _baseUrl = 'https://task-manager-api3.p.rapidapi.com';
+  static const String _apiKey =
+      '17a8109e66msh011e55fa041973dp1307d5jsn552a579f48b3';
+  static const String _apiHost = 'task-manager-api3.p.rapidapi.com';
+
+  static const Map<String, String> _headers = {
+    'Content-Type': 'application/json',
+    'x-rapidapi-host': _apiHost,
+    'x-rapidapi-key': _apiKey,
+  };
+
+  // Get All Tasks
+  Future<List<Task>> getTasks() async {
+    try {
+      final response = await http.get(Uri.parse(_baseUrl), headers: _headers);
+      debugPrint('API Response Status Code: ${response.statusCode}');
+      debugPrint('API Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        /// json api trả về dạng '{id, title, description, status}';
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+        // Check if the response has the expected structure
+        if (jsonResponse['status'] == 'success' &&
+            jsonResponse['data'] != null) {
+          final List<dynamic> taskList = jsonResponse['data'] as List;
+          return taskList.map((taskJson) {
+            // Add default fields if missing from API response
+            final taskData = Map<String, dynamic>.from(taskJson);
+
+            taskData['isLocalOnly'] = false;
+            taskData['needsSync'] = false;
+
+            return Task.fromJson(taskData);
+          }).toList();
+        } else {
+          throw Exception('Invalid API response format');
+        }
+      } else {
+        throw Exception('Failed to fetch tasks');
+      }
+    } catch (e) {
+      debugPrint("Error fetching tasks $e");
+      throw Exception('Failed to fetch tasks $e');
+    }
+  }
+}
