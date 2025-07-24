@@ -12,10 +12,10 @@ class DemoProvider with ChangeNotifier {
   /// setter
 
   void increment() {
-    _counter++;
+    _counter++; // 1
     print("counter $_counter");
 
-    notifyListeners();
+    notifyListeners(); // push noti
   }
 
   void increateAge() {

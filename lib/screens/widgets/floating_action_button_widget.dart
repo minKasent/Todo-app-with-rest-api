@@ -9,7 +9,7 @@ class FloatingActionButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         Navigator.pushNamed(context, AppRoutes.add);
       },
       child: Container(
@@ -18,11 +18,13 @@ class FloatingActionButtonWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColorsPath.purple,
           shape: BoxShape.circle,
-          boxShadow :[ BoxShadow(
-            color: AppColorsPath.dark.withValues(alpha: 0.25),
-            blurRadius: 4,
-            offset: Offset(0, 7),
-          ),],
+          boxShadow: [
+            BoxShadow(
+              color: AppColorsPath.dark.withValues(alpha: 0.25),
+              blurRadius: 4,
+              offset: Offset(0, 7),
+            ),
+          ],
         ),
         child: Icon(Icons.add, color: AppColorsPath.white, size: 35),
       ),

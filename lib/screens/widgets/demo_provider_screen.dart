@@ -85,7 +85,7 @@ class CounterWithSelect extends StatelessWidget {
     //   },
     // );
 
-    return Selector<DemoProvider, int>(
+    return Selector<DemoProvider, int>( // 0 -> 1
       selector: (_, demoProvider) => demoProvider.counter,
       builder: (_, data, __) {
         return Text('$data');

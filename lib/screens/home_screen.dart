@@ -39,7 +39,12 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             AppText(style: AppTextStyle.text24SemiBold, content: 'TODO APP'),
-            Image.asset(AppIconsPath.icCalendar, width: 60, height: 60, color: AppColorsPath.white),
+            Image.asset(
+              AppIconsPath.icCalendar,
+              width: 60,
+              height: 60,
+              color: AppColorsPath.white,
+            ),
           ],
         ),
       ),
@@ -123,8 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showDeleteDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
+      builder: (context) => AlertDialog(
         title: Text('Delete confirmation'),
         content: Text('Are you sure you want to delete this task?'),
         actions: [
@@ -140,9 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

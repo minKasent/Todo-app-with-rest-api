@@ -17,25 +17,33 @@ class BottomNavigationBarWidget extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildBottomNavigationBarItemWidget(context,isCompleteTab: false),
-            _buildBottomNavigationBarItemWidget(context , isCompleteTab: true),
+            _buildBottomNavigationBarItemWidget(context, isCompleteTab: false),
+            _buildBottomNavigationBarItemWidget(context, isCompleteTab: true),
           ],
         ),
       ),
-    ) ;
-
+    );
   }
-  GestureDetector _buildBottomNavigationBarItemWidget(BuildContext context , {required bool isCompleteTab} ){
-    return  GestureDetector(
-      onTap: isCompleteTab ?  () {
-        Navigator.pushNamed(context, AppRoutes.complete);
-      } : null ,
+
+  GestureDetector _buildBottomNavigationBarItemWidget(
+    BuildContext context, {
+    required bool isCompleteTab,
+  }) {
+    return GestureDetector(
+      onTap: isCompleteTab
+          ? () {
+              Navigator.pushNamed(context, AppRoutes.complete);
+            }
+          : null,
       child: Column(
         children: [
-          Icon(isCompleteTab ? Icons.check : Icons.format_list_bulleted,
-              color: isCompleteTab ? AppColorsPath.gray : AppColorsPath.purple, size: 30),
+          Icon(
+            isCompleteTab ? Icons.check : Icons.format_list_bulleted,
+            color: isCompleteTab ? AppColorsPath.gray : AppColorsPath.purple,
+            size: 30,
+          ),
           AppText(
-            content: isCompleteTab? "Completed" : "All",
+            content: isCompleteTab ? "Completed" : "All",
             style: AppTextStyle.text10Regular.copyWith(
               color: isCompleteTab ? AppColorsPath.gray : AppColorsPath.purple,
             ),
