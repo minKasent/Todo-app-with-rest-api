@@ -51,4 +51,11 @@ class ApiService {
       throw Exception('Failed to fetch tasks $e');
     }
   }
+  Future<Task> addTask(Task task) async{
+    final response = await http.post(
+      Uri.parse(_baseUrl),
+      headers: _headers,
+      body: json.decode(response.body)
+    );
+  }
 }
