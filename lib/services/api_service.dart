@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static const String _baseUrl = 'https://task-manager-api3.p.rapidapi.com';
   static const String _apiKey =
-      '17a8109e66msh011e55fa041973dp1307d5jsn552a579f48b3';
+      'cdc1d88752mshe097344adee9d32p1a5063jsnfc190737c508';
   static const String _apiHost = 'task-manager-api3.p.rapidapi.com';
 
   static const Map<String, String> _headers = {
