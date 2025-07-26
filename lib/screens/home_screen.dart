@@ -21,7 +21,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<TaskProvider>().loadTasks();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TaskProvider>().loadTasks();
+    });
   }
 
   @override
@@ -97,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           content: task.title,
                           style: AppTextStyle.text13Semibold,
                         ),
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         AppText(
                           content: task.description,
                           style: AppTextStyle.text10Regular,
@@ -105,8 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(width: 16),
-                  ..._buildListIconsWidget(),
+                  const SizedBox(width: 16),
+                  ..._buildListIconsActionWidget(task),
                 ],
               ),
             );
@@ -127,14 +129,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<Widget> _buildListIconsWidget() {
+  List<Widget> _buildListIconsActionWidget(Task task) {
     return [
       _buildIconWidget(
         onTap: () {
           Navigator.pushNamed(
             context,
             AppRoutes.edit,
-            arguments: {'title': 'todoTitle', 'detail': 'todoDetail '},
+            arguments: {'task': task},
           );
         },
         imagePath: AppIconsPath.icPencil,
@@ -142,20 +144,22 @@ class _HomeScreenState extends State<HomeScreen> {
       SizedBox(width: 20),
       _buildIconWidget(
         onTap: () {
-          _showDeleteDialog();
+          _showDeleteDialog(task.id!);
         },
         imagePath: AppIconsPath.icTrash,
       ),
       SizedBox(width: 20),
       _buildIconWidget(
-        /// TODO: complete task logic
-        onTap: () {},
+        onTap: () {
+          final updatedTask = task.copyWith(status: 'completada');
+          context.read<TaskProvider>().updateTask(updatedTask);
+        },
         imagePath: AppIconsPath.icCheckCircle,
       ),
     ];
   }
 
-  void _showDeleteDialog() {
+  void _showDeleteDialog(String taskId) {
     showDialog(
       context: context,
       builder:
@@ -170,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
               TextButton(
                 child: Text('Delete', style: TextStyle(color: Colors.red)),
                 onPressed: () {
-                  /// TODO : Handle delete action here
+                  context.read<TaskProvider>().deleteTask(taskId);
                   Navigator.of(context).pop();
                 },
               ),

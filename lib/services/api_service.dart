@@ -51,11 +51,56 @@ class ApiService {
       throw Exception('Failed to fetch tasks $e');
     }
   }
-  Future<Task> addTask(Task task) async{
-    final response = await http.post(
-      Uri.parse(_baseUrl),
-      headers: _headers,
-      body: json.decode(response.body)
-    );
+
+  Future<Task> addTask(Task task) async {
+    try {
+      final response = await http.post(
+        Uri.parse(_baseUrl),
+        headers: _headers,
+        body: json.encode(task.toJson()),
+      );
+      debugPrint('API Response Status Code (Post) : ${response.statusCode}');
+      debugPrint('API Response Body (Post) : ${response.body}');
+      if (response.statusCode == 201) {
+        return Task.fromJson(json.decode(response.body));
+      } else {
+        throw Exception("Failed to add task");
+      }
+    } catch (e) {
+      debugPrint("Error adding task $e");
+      throw Exception('Failed to add task $e');
+    }
+  }
+
+  Future<void> updateTask(Task task) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$_baseUrl/${task.id}'),
+        headers: _headers,
+        body: json.encode(json.encode(task.toJson())),
+      );
+      debugPrint('API Response Status Code (Put) : ${response.statusCode}');
+      if(response.statusCode != 200){
+        throw Exception("Failed to update task");
+      }
+    } catch (e) {
+      debugPrint("Error updating task $e");
+      throw Exception('Failed to update task $e');
+    }
+  }
+  Future<void> deleteTask(String id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$_baseUrl/$id'),
+        headers: _headers,
+      );
+      debugPrint('API Response Status Code (Delete) : ${response.statusCode}');
+      if(response.statusCode != 204){
+        throw Exception("Failed to delete task");
+      }
+    } catch (e) {
+      debugPrint("Error deleting task $e");
+      throw Exception('Failed to delete task $e');
+    }
   }
 }

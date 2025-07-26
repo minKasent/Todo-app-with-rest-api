@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app_with_rest_api/components/app_text.dart';
 import 'package:todo_app_with_rest_api/components/app_text_field.dart';
 import 'package:todo_app_with_rest_api/components/app_text_style.dart';
 import 'package:todo_app_with_rest_api/constants/app_colors_path.dart';
+import 'package:todo_app_with_rest_api/provider/task_provider.dart';
 import 'package:todo_app_with_rest_api/screens/widgets/appbar_widget.dart';
 import 'package:todo_app_with_rest_api/screens/widgets/show_custom_snackbar_widget.dart';
 
@@ -36,6 +38,8 @@ class AddScreen extends StatelessWidget {
                   );
                   return;
                 }
+                context.read<TaskProvider>().addTask(title, detail);
+                Navigator.pop(context);
                 ShowCustomSnackBar(
                   context,
                   message: "Lưu thành công",

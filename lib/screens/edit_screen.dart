@@ -1,23 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app_with_rest_api/components/app_text.dart';
 import 'package:todo_app_with_rest_api/components/app_text_field.dart';
 import 'package:todo_app_with_rest_api/components/app_text_style.dart';
 import 'package:todo_app_with_rest_api/constants/app_colors_path.dart';
+import 'package:todo_app_with_rest_api/models/task.dart';
+import 'package:todo_app_with_rest_api/provider/task_provider.dart';
 import 'package:todo_app_with_rest_api/screens/widgets/appbar_widget.dart';
 import 'package:todo_app_with_rest_api/screens/widgets/show_custom_snackbar_widget.dart';
 
-class EditScreen extends StatelessWidget {
+class EditScreen extends StatefulWidget {
+  const EditScreen({super.key});
+
+  @override
+  State<EditScreen> createState() => _EditScreenState();
+}
+
+class _EditScreenState extends State<EditScreen> {
   final titleController = TextEditingController();
   final detailController = TextEditingController();
+  Task? _task; // Lưu trữ task được truyền vào
 
-  EditScreen({super.key});
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_task == null) {
+      final args = ModalRoute.of(context)!.settings.arguments as Map?;
+      _task = args?['task'];
+      if (_task != null) {
+        titleController.text = _task!.title;
+        detailController.text = _task!.description;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    detailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as Map?;
-    titleController.text = args?['title'] ?? '';
-    detailController.text = args?['detail'] ?? '';
-
     return Scaffold(
       appBar: AppbarWidget(content: "Edit Task"),
       backgroundColor: Colors.white,
@@ -53,12 +78,20 @@ class EditScreen extends StatelessWidget {
                       );
                       return;
                     }
-                    ShowCustomSnackBar(
-                      context,
-                      message: "Lưu thành công",
-                      icon: Icons.check_circle,
-                      backgroundColor: AppColorsPath.green,
-                    );
+                    if (_task != null) {
+                      final updatedTask = _task!.copyWith(
+                        title: title,
+                        description: detail,
+                      );
+                      context.read<TaskProvider>().updateTask(updatedTask);
+                      Navigator.pop(context);
+                      ShowCustomSnackBar(
+                        context,
+                        message: "Lưu thành công",
+                        icon: Icons.check_circle,
+                        backgroundColor: AppColorsPath.green,
+                      );
+                    }
                   },
                   child: _buildButtonWidget(content: "Update"),
                 ),

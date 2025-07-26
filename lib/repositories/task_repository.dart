@@ -15,4 +15,27 @@ class TaskRepository {
       return [];
     }
   }
+  Future<Task> addTask(Task task ) async {
+    try{
+      final apiTask = await _apiService.addTask(task);
+      return apiTask;
+    }catch(e){
+      throw Exception("Error in addTask $e");
+    }
+  }
+  Future<void> updateTask(Task task) async {
+    try {
+      final apiTask = await _apiService.updateTask(task);
+      return apiTask;
+    } catch (e) {
+      throw Exception("Error in updateTask $e");
+    }
+  }
+  Future<void> deleteTask(String id) async {
+    try {
+      await _apiService.deleteTask(id);
+    } catch (e) {
+      throw Exception("Error in deleteTask $e");
+    }
+  }
 }
