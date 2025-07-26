@@ -17,8 +17,8 @@ class EditScreen extends StatefulWidget {
 }
 
 class _EditScreenState extends State<EditScreen> {
-  final titleController = TextEditingController();
-  final detailController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _detailController = TextEditingController();
   Task? _task; // Lưu trữ task được truyền vào
 
   @override
@@ -26,18 +26,18 @@ class _EditScreenState extends State<EditScreen> {
     super.didChangeDependencies();
     if (_task == null) {
       final args = ModalRoute.of(context)!.settings.arguments as Map?;
-      _task = args?['task'];
-      if (_task != null) {
-        titleController.text = _task!.title;
-        detailController.text = _task!.description;
+      if (args != null && args.containsKey('task')) {
+        _task = args['task'] as Task;
+        _titleController.text = _task!.title;
+        _detailController.text = _task!.description;
       }
     }
   }
 
   @override
   void dispose() {
-    titleController.dispose();
-    detailController.dispose();
+    _titleController.dispose();
+    _detailController.dispose();
     super.dispose();
   }
 
@@ -55,9 +55,9 @@ class _EditScreenState extends State<EditScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AppTextField(label: 'Title', controller: titleController),
+                  AppTextField(label: 'Title', controller: _titleController),
                   SizedBox(height: 43),
-                  AppTextField(label: 'Detail', controller: detailController),
+                  AppTextField(label: 'Detail', controller: _detailController),
                 ],
               ),
             ),
@@ -67,8 +67,8 @@ class _EditScreenState extends State<EditScreen> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    String title = titleController.text.trim();
-                    String detail = detailController.text.trim();
+                    String title = _titleController.text.trim();
+                    String detail = _detailController.text.trim();
                     if (title.isEmpty || detail.isEmpty) {
                       ShowCustomSnackBar(
                         context,

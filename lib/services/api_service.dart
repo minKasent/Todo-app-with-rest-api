@@ -77,9 +77,10 @@ class ApiService {
       final response = await http.put(
         Uri.parse('$_baseUrl/${task.id}'),
         headers: _headers,
-        body: json.encode(json.encode(task.toJson())),
+        body: json.encode(task.toJson()),
       );
       debugPrint('API Response Status Code (Put) : ${response.statusCode}');
+      debugPrint('API Response Body (Put) : ${response.body}');
       if(response.statusCode != 200){
         throw Exception("Failed to update task");
       }
