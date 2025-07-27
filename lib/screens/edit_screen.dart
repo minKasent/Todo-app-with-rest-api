@@ -72,7 +72,7 @@ class _EditScreenState extends State<EditScreen> {
                     if (title.isEmpty || detail.isEmpty) {
                       ShowCustomSnackBar(
                         context,
-                        message: "Không được để trống",
+                        message: "No empty",
                         icon: Icons.error_outline,
                         backgroundColor: AppColorsPath.red,
                       );
@@ -87,7 +87,7 @@ class _EditScreenState extends State<EditScreen> {
                       Navigator.pop(context);
                       ShowCustomSnackBar(
                         context,
-                        message: "Lưu thành công",
+                        message: "Save successfully",
                         icon: Icons.check_circle,
                         backgroundColor: AppColorsPath.green,
                       );
