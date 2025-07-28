@@ -30,14 +30,14 @@ class ApiService {
         // Check if the response has the expected structure
         if (jsonResponse['status'] == 'success' &&
             jsonResponse['data'] != null) {
-          final List<dynamic> taskList = jsonResponse['data'] as List;
+          final List<dynamic> taskList = jsonResponse['data'] as List; // Map convert to List<dynamic>
           return taskList.map((taskJson) {
             // Add default fields if missing from API response
             final taskData = Map<String, dynamic>.from(taskJson);
 
             taskData['isLocalOnly'] = false;
             taskData['needsSync'] = false;
-
+            // gán vào model Task
             return Task.fromJson(taskData);
           }).toList();
         } else {
