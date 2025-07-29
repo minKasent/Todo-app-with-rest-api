@@ -30,8 +30,8 @@ class ApiService {
         // Check if the response has the expected structure
         if (jsonResponse['status'] == 'success' &&
             jsonResponse['data'] != null) {
-          final List<dynamic> taskList = jsonResponse['data'] as List; // Map convert to List<dynamic>
-          return taskList.map((taskJson) {
+          final List<dynamic> taskList = jsonResponse['data'] as List;// convert dynamic to List
+          return taskList.map((taskJson) {//
             // Add default fields if missing from API response
             final taskData = Map<String, dynamic>.from(taskJson);
 
