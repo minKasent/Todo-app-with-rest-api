@@ -19,7 +19,7 @@ class EditScreen extends StatefulWidget {
 class _EditScreenState extends State<EditScreen> {
   final _titleController = TextEditingController();
   final _detailController = TextEditingController();
-  Task? _task; // Lưu trữ task được truyền vào
+  Task? _task;
 
   @override
   void didChangeDependencies() {
