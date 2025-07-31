@@ -9,6 +9,7 @@ import 'package:todo_app_with_rest_api/provider/task_provider.dart';
 import 'package:todo_app_with_rest_api/routes/app_routes.dart';
 import 'package:todo_app_with_rest_api/screens/widgets/bottom_navigation_bar_widget.dart';
 import 'package:todo_app_with_rest_api/screens/widgets/floating_action_button_widget.dart';
+import 'package:todo_app_with_rest_api/screens/widgets/show_custom_snackbar_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TaskProvider>().loadTasks();
+      context.read<TaskProvider>().init();
     });
   }
 
@@ -33,7 +34,37 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: _buildAppBarWidget(),
       body: Padding(
         padding: const EdgeInsets.only(right: 7, top: 22, left: 7),
-        child: Column(children: [Expanded(child: _buildListTasksWidget())]),
+        child: Column(
+          children: [
+            Expanded(
+              child: Consumer<TaskProvider>(
+                builder: (context, taskProvider, child) {
+                  /// Loading case
+                  if (taskProvider.isLoading) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  /// Error case
+                  if (taskProvider.hasError) {
+                    return _buildErrorWidget(taskProvider);
+                  }
+
+                  final pendingTasks = taskProvider.pendingTasks;
+
+                  return RefreshIndicator(
+                    child:
+                        pendingTasks.isEmpty
+                            ? _buildEmptyWidget()
+                            : _buildListTasksWidget(pendingTasks),
+                    onRefresh: () async {
+                      await context.read<TaskProvider>().refresh();
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButtonWidget(),
       bottomNavigationBar: BottomNavigationBarWidget(),
@@ -62,60 +93,106 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Selector _buildListTasksWidget() {
-    return Selector<TaskProvider, List<Task>>(
-      builder: (_, data, __) {
-        return ListView.separated(
-          separatorBuilder: (context, index) => SizedBox(height: 21),
-          itemCount: data.length,
-          padding: EdgeInsets.only(bottom: 30),
-          itemBuilder: (context, index) {
-            final task = data[index];
-            return Container(
-              decoration: BoxDecoration(
-                color: AppColorsPath.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColorsPath.dark.withValues(alpha: 0.25),
-                    blurRadius: 4,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+  Center _buildErrorWidget(TaskProvider taskProvider) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 64, color: Colors.red),
+          SizedBox(height: 16),
+          AppText(
+            content: 'Error: ${taskProvider.error}',
+            style: AppTextStyle.text24SemiBold.copyWith(color: Colors.red),
+          ),
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => taskProvider.init(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              foregroundColor: Colors.white,
+            ),
+            child: AppText(
+              content: "Retry",
+              style: AppTextStyle.text13Semibold.copyWith(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  ListView _buildEmptyWidget() {
+    return ListView(
+      children: [
+        SizedBox(height: 200),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AppText(
+                content: 'No task yet',
+                style: AppTextStyle.text24SemiBold.copyWith(
+                  color: AppColorsPath.dark,
+                ),
               ),
-              padding: EdgeInsets.only(
-                left: 19,
-                top: 20,
-                bottom: 20,
-                right: 25,
+              SizedBox(height: 16),
+              AppText(
+                content: 'Add your first task to get started',
+                style: AppTextStyle.text24SemiBold.copyWith(
+                  color: AppColorsPath.dark,
+                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppText(
-                          content: task.title,
-                          style: AppTextStyle.text13Semibold,
-                        ),
-                        const SizedBox(height: 5),
-                        AppText(
-                          content: task.description,
-                          style: AppTextStyle.text10Regular,
-                        ),
-                      ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  ListView _buildListTasksWidget(List<Task> tasks) {
+    return ListView.separated(
+      separatorBuilder: (context, index) => SizedBox(height: 21),
+      itemCount: tasks.length,
+      padding: EdgeInsets.only(bottom: 30),
+      itemBuilder: (context, index) {
+        final task = tasks[index];
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColorsPath.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: AppColorsPath.dark.withValues(alpha: 0.25),
+                blurRadius: 4,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: EdgeInsets.only(left: 19, top: 20, bottom: 20, right: 25),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppText(
+                      content: task.title,
+                      style: AppTextStyle.text13Semibold,
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  ..._buildListIconsActionWidget(task),
-                ],
+                    const SizedBox(height: 5),
+                    AppText(
+                      content: task.description,
+                      style: AppTextStyle.text10Regular,
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
+              const SizedBox(width: 16),
+              ..._buildListIconsActionWidget(task),
+            ],
+          ),
         );
       },
-      selector: (_, taskProvider) => taskProvider.pendingTasks,
     );
   }
 
@@ -144,7 +221,18 @@ class _HomeScreenState extends State<HomeScreen> {
       SizedBox(width: 20),
       _buildIconWidget(
         onTap: () {
-          _showDeleteDialog(task.id!);
+          if (task.id == null) {
+            /// Show dialog notify id task null
+            debugPrint("Task id is null");
+            showCustomSnackBar(
+              context,
+              message: "Task id is null",
+              icon: Icons.error_outline,
+              backgroundColor: AppColorsPath.red,
+            );
+          } else {
+            _showDeleteDialog(task.id!);
+          }
         },
         imagePath: AppIconsPath.icTrash,
       ),

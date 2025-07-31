@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static const String _baseUrl = 'https://task-manager-api3.p.rapidapi.com';
   static const String _apiKey =
-      'cdc1d88752mshe097344adee9d32p1a5063jsnfc190737c508';
+      '73f36bbf3emsh0485c276574c141p16ec83jsne2d270cfbfc0';
   static const String _apiHost = 'task-manager-api3.p.rapidapi.com';
 
   static const Map<String, String> _headers = {
@@ -30,8 +30,10 @@ class ApiService {
         // Check if the response has the expected structure
         if (jsonResponse['status'] == 'success' &&
             jsonResponse['data'] != null) {
-          final List<dynamic> taskList = jsonResponse['data'] as List;// convert dynamic to List
-          return taskList.map((taskJson) {//
+          final List<dynamic> taskList =
+              jsonResponse['data'] as List; // convert dynamic to List
+          return taskList.map((taskJson) {
+            //
             // Add default fields if missing from API response
             final taskData = Map<String, dynamic>.from(taskJson);
 
@@ -81,7 +83,7 @@ class ApiService {
       );
       debugPrint('API Response Status Code (Put) : ${response.statusCode}');
       debugPrint('API Response Body (Put) : ${response.body}');
-      if(response.statusCode != 200){
+      if (response.statusCode != 200) {
         throw Exception("Failed to update task");
       }
     } catch (e) {
@@ -89,19 +91,41 @@ class ApiService {
       throw Exception('Failed to update task $e');
     }
   }
-  Future<void> deleteTask(String id) async {
+
+  Future<void> deleteTask(String taskId) async {
     try {
       final response = await http.delete(
-        Uri.parse('$_baseUrl/$id'),
+        Uri.parse('$_baseUrl/$taskId'),
         headers: _headers,
       );
       debugPrint('API Response Status Code (Delete) : ${response.statusCode}');
-      if(response.statusCode != 204){
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+        if (jsonResponse['status'] == 'success') {
+          return;
+        } else {
+          throw Exception("Failed to delete task: ${jsonResponse['message']}");
+        }
+      } else {
         throw Exception("Failed to delete task");
       }
     } catch (e) {
       debugPrint("Error deleting task $e");
       throw Exception('Failed to delete task $e');
+    }
+  }
+
+  Future<bool> isApiReachable() async {
+    try {
+      final response = await http
+          .get(Uri.parse(_baseUrl), headers: _headers)
+          .timeout(const Duration(seconds: 5));
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("Api is not reachable $e");
+      return false;
     }
   }
 }

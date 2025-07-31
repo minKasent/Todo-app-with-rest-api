@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-void ShowCustomSnackBar(
+void showCustomSnackBar(
   BuildContext context, {
   required String message,
   required IconData icon,

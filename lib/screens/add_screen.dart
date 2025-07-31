@@ -30,7 +30,7 @@ class AddScreen extends StatelessWidget {
                 String title = titleController.text.trim();
                 String detail = detailController.text.trim();
                 if (title.isEmpty || detail.isEmpty) {
-                  ShowCustomSnackBar(
+                  showCustomSnackBar(
                     context,
                     message: "Không được để trống",
                     icon: Icons.error_outline,
@@ -40,7 +40,7 @@ class AddScreen extends StatelessWidget {
                 }
                 context.read<TaskProvider>().addTask(title, detail);
                 Navigator.pop(context);
-                ShowCustomSnackBar(
+                showCustomSnackBar(
                   context,
                   message: "Lưu thành công",
                   icon: Icons.check_circle,

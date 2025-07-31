@@ -70,7 +70,7 @@ class _EditScreenState extends State<EditScreen> {
                     String title = _titleController.text.trim();
                     String detail = _detailController.text.trim();
                     if (title.isEmpty || detail.isEmpty) {
-                      ShowCustomSnackBar(
+                      showCustomSnackBar(
                         context,
                         message: "No empty",
                         icon: Icons.error_outline,
@@ -85,7 +85,7 @@ class _EditScreenState extends State<EditScreen> {
                       );
                       context.read<TaskProvider>().updateTask(updatedTask);
                       Navigator.pop(context);
-                      ShowCustomSnackBar(
+                      showCustomSnackBar(
                         context,
                         message: "Save successfully",
                         icon: Icons.check_circle,
