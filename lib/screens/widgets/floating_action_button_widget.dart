@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
+import 'package:provider/provider.dart';
 import 'package:todo_app_with_rest_api/constants/app_colors_path.dart';
 import 'package:todo_app_with_rest_api/routes/app_routes.dart';
+import 'package:todo_app_with_rest_api/provider/task_provider.dart';
 
 class FloatingActionButtonWidget extends StatelessWidget {
   const FloatingActionButtonWidget({super.key});
@@ -9,8 +11,14 @@ class FloatingActionButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, AppRoutes.add);
+      onTap: () async {
+        // Navigate to add screen và chờ result
+        final result = await Navigator.pushNamed(context, AppRoutes.add);
+
+        // Nếu add thành công, reload tasks
+        if (result == true) {
+          context.read<TaskProvider>().loadTasks();
+        }
       },
       child: Container(
         width: 70,

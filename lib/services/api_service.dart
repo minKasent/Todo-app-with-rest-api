@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static const String _baseUrl = 'https://task-manager-api3.p.rapidapi.com';
   static const String _apiKey =
-      'cdc1d88752mshe097344adee9d32p1a5063jsnfc190737c508';
+      '73f36bbf3emsh0485c276574c141p16ec83jsne2d270cfbfc0';
   static const String _apiHost = 'task-manager-api3.p.rapidapi.com';
 
   static const Map<String, String> _headers = {
@@ -30,16 +30,20 @@ class ApiService {
         // Check if the response has the expected structure
         if (jsonResponse['status'] == 'success' &&
             jsonResponse['data'] != null) {
-          final List<dynamic> taskList = jsonResponse['data'] as List;// convert dynamic to List
-          return taskList.map((taskJson) {//
-            // Add default fields if missing from API response
-            final taskData = Map<String, dynamic>.from(taskJson);
+          final List<dynamic> taskListJson = jsonResponse['data'] as List;
 
-            taskData['isLocalOnly'] = false;
-            taskData['needsSync'] = false;
-            // gán vào model Task
-            return Task.fromJson(taskData);
-          }).toList();
+          return taskListJson
+              .map((taskJson) {
+                final taskData = Map<String, dynamic>.from(taskJson);
+                if (taskData['id'] != null) {
+                  taskData['id'] = taskData['id'].toString();
+                }
+                taskData['isLocalOnly'] = false;
+                taskData['needsSync'] = false;
+                return Task.fromJson(taskData);
+              })
+              .where((task) => task.id != null) // Lọc ra các task có id là null
+              .toList();
         } else {
           throw Exception('Invalid API response format');
         }
@@ -54,41 +58,85 @@ class ApiService {
 
   Future<Task> addTask(Task task) async {
     try {
+      final Map<String, dynamic> taskdata = {
+        'title': task.title,
+        'description': task.description,
+        'status': task.status,
+      };
       final response = await http.post(
         Uri.parse(_baseUrl),
         headers: _headers,
-        body: json.encode(task.toJson()),
+        body: json.encode(taskdata),
       );
       debugPrint('API Response Status Code (Post) : ${response.statusCode}');
       debugPrint('API Response Body (Post) : ${response.body}');
+
       if (response.statusCode == 201) {
-        return Task.fromJson(json.decode(response.body));
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+        Map<String, dynamic> taskData;
+
+        // Xử lý response có thể có cấu trúc khác nhau
+        if (jsonResponse['status'] == 'success' &&
+            jsonResponse['data'] != null) {
+          taskData = Map<String, dynamic>.from(jsonResponse['data']);
+        } else {
+          // Nếu response trực tiếp là task data
+          taskData = Map<String, dynamic>.from(jsonResponse);
+        }
+
+        // Xử lý id an toàn - convert sang string nếu cần
+        if (taskData['id'] != null) {
+          taskData['id'] = taskData['id'].toString();
+        } else {
+          // Nếu không có id, tạo một id tạm thời
+          taskData['id'] = DateTime.now().millisecondsSinceEpoch.toString();
+        }
+
+        // Đảm bảo các field cần thiết tồn tại
+        taskData['title'] = taskData['title'] ?? task.title;
+        taskData['description'] = taskData['description'] ?? task.description;
+        taskData['status'] = taskData['status'] ?? task.status;
+        taskData['isLocalOnly'] = false;
+        taskData['needsSync'] = false;
+
+        return Task.fromJson(taskData);
       } else {
-        throw Exception("Failed to add task");
+        throw Exception(
+          "Failed to add task: ${response.statusCode} - ${response.body}",
+        );
       }
     } catch (e) {
       debugPrint("Error adding task $e");
-      throw Exception('Failed to add task $e');
+      throw Exception('Failed to add task: $e');
     }
   }
 
   Future<void> updateTask(Task task) async {
     try {
+      final Map<String, dynamic> taskdata = {
+        'title': task.title,
+        'description': task.description,
+        'status': task.status,
+      };
+
       final response = await http.put(
         Uri.parse('$_baseUrl/${task.id}'),
         headers: _headers,
-        body: json.encode(task.toJson()),
+        body: json.encode(taskdata),
       );
       debugPrint('API Response Status Code (Put) : ${response.statusCode}');
       debugPrint('API Response Body (Put) : ${response.body}');
-      if(response.statusCode != 200){
-        throw Exception("Failed to update task");
+
+      if (response.statusCode != 200) {
+        throw Exception("Failed to update task: ${response.statusCode}");
       }
     } catch (e) {
       debugPrint("Error updating task $e");
-      throw Exception('Failed to update task $e');
+      throw Exception('Failed to update task: $e');
     }
   }
+
   Future<void> deleteTask(String id) async {
     try {
       final response = await http.delete(
@@ -96,12 +144,12 @@ class ApiService {
         headers: _headers,
       );
       debugPrint('API Response Status Code (Delete) : ${response.statusCode}');
-      if(response.statusCode != 204){
+      if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception("Failed to delete task");
       }
     } catch (e) {
       debugPrint("Error deleting task $e");
-      throw Exception('Failed to delete task $e');
+      throw Exception('Failed to delete task: $e');
     }
   }
 }

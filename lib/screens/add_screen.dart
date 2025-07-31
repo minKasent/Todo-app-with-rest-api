@@ -26,7 +26,7 @@ class AddScreen extends StatelessWidget {
             AppTextField(label: 'Detail', controller: detailController),
             SizedBox(height: 54),
             GestureDetector(
-              onTap: () {
+              onTap: () async {
                 String title = titleController.text.trim();
                 String detail = detailController.text.trim();
                 if (title.isEmpty || detail.isEmpty) {
@@ -38,14 +38,50 @@ class AddScreen extends StatelessWidget {
                   );
                   return;
                 }
-                context.read<TaskProvider>().addTask(title, detail);
-                Navigator.pop(context);
-                ShowCustomSnackBar(
-                  context,
-                  message: "Lưu thành công",
-                  icon: Icons.check_circle,
-                  backgroundColor: AppColorsPath.green,
+
+                // Hiển thị loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder:
+                      (context) => Center(child: CircularProgressIndicator()),
                 );
+
+                final success = await context.read<TaskProvider>().addTask(
+                  title,
+                  detail,
+                );
+
+                // Đóng loading dialog
+                Navigator.pop(context);
+
+                if (success) {
+                  // Hiển thị thông báo thành công trước
+                  ShowCustomSnackBar(
+                    context,
+                    message: "Lưu thành công",
+                    icon: Icons.check_circle,
+                    backgroundColor: AppColorsPath.green,
+                  );
+
+                  // Delay một chút để user thấy thông báo, sau đó quay lại và reload
+                  await Future.delayed(Duration(milliseconds: 500));
+
+                  // Quay lại home screen
+                  Navigator.pop(
+                    context,
+                    true,
+                  ); // Return true để indicate success
+                } else {
+                  final errorMessage =
+                      context.read<TaskProvider>().errorMessage;
+                  ShowCustomSnackBar(
+                    context,
+                    message: errorMessage ?? "Có lỗi xảy ra",
+                    icon: Icons.error_outline,
+                    backgroundColor: AppColorsPath.red,
+                  );
+                }
               },
               child: _buildButtonWidget(context),
             ),

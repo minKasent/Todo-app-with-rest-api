@@ -132,12 +132,18 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> _buildListIconsActionWidget(Task task) {
     return [
       _buildIconWidget(
-        onTap: () {
-          Navigator.pushNamed(
+        onTap: () async {
+          // Navigate to edit screen và chờ result
+          final result = await Navigator.pushNamed(
             context,
             AppRoutes.edit,
             arguments: {'task': task},
           );
+
+          // Nếu edit thành công, reload tasks
+          if (result == true) {
+            context.read<TaskProvider>().loadTasks();
+          }
         },
         imagePath: AppIconsPath.icPencil,
       ),
@@ -150,9 +156,60 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       SizedBox(width: 20),
       _buildIconWidget(
-        onTap: () {
-          final updatedTask = task.copyWith(status: 'completada');
-          context.read<TaskProvider>().updateTask(updatedTask);
+        onTap: () async {
+          // Lưu trữ contexts trước khi async operation
+          final scaffoldMessenger = ScaffoldMessenger.of(context);
+          final navigator = Navigator.of(context);
+          final taskProvider = context.read<TaskProvider>();
+
+          // Hiển thị loading indicator
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+
+          try {
+            final updatedTask = task.copyWith(status: 'completada');
+            final success = await taskProvider.updateTask(updatedTask);
+
+            // Đóng loading dialog
+            if (mounted) {
+              navigator.pop();
+            }
+
+            if (mounted) {
+              if (success) {
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Đánh dấu hoàn thành thành công'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } else {
+                final errorMessage = taskProvider.errorMessage;
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text(errorMessage ?? 'Có lỗi xảy ra khi cập nhật task'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
+          } catch (e) {
+            // Đóng loading dialog nếu có lỗi
+            if (mounted) {
+              navigator.pop();
+              scaffoldMessenger.showSnackBar(
+                SnackBar(
+                  content: Text('Có lỗi xảy ra: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
         },
         imagePath: AppIconsPath.icCheckCircle,
       ),
@@ -162,27 +219,79 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showDeleteDialog(String taskId) {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Delete confirmation'),
-            content: Text('Are you sure you want to delete this task?'),
-            actions: [
-              TextButton(
-                child: Text('Cancel', style: TextStyle(color: Colors.grey)),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              TextButton(
-                child: Text('Delete', style: TextStyle(color: Colors.red)),
-                onPressed: () {
-                  context.read<TaskProvider>().deleteTask(taskId);
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Xác nhận xóa'),
+        content: Text('Bạn có chắc chắn muốn xóa task này không?'),
+        actions: [
+          TextButton(
+            child: Text('Hủy', style: TextStyle(color: Colors.grey)),
+            onPressed: () => Navigator.of(dialogContext).pop(),
           ),
+          TextButton(
+            child: Text('Xóa', style: TextStyle(color: Colors.red)),
+            onPressed: () async {
+              // Lưu trữ contexts trước khi async operation
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              final navigator = Navigator.of(context);
+              final taskProvider = context.read<TaskProvider>();
+
+              Navigator.of(dialogContext).pop();
+
+              // Hiển thị loading indicator
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (loadingContext) => Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+
+              try {
+                final success = await taskProvider.deleteTask(taskId);
+
+                // Đóng loading dialog
+                if (mounted) {
+                  navigator.pop();
+                }
+
+                // Hiển thị kết quả
+                if (mounted) {
+                  if (success) {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text('Xóa task thành công'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } else {
+                    final errorMessage = taskProvider.errorMessage;
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text(errorMessage ?? 'Có lỗi xảy ra khi xóa task'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              } catch (e) {
+                // Đóng loading dialog nếu có lỗi
+                if (mounted) {
+                  navigator.pop();
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text('Có lỗi xảy ra: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
     );
   }
 }

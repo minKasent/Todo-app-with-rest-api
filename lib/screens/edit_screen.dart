@@ -66,31 +66,67 @@ class _EditScreenState extends State<EditScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     String title = _titleController.text.trim();
                     String detail = _detailController.text.trim();
                     if (title.isEmpty || detail.isEmpty) {
                       ShowCustomSnackBar(
                         context,
-                        message: "No empty",
+                        message: "Không được để trống",
                         icon: Icons.error_outline,
                         backgroundColor: AppColorsPath.red,
                       );
                       return;
                     }
                     if (_task != null) {
+                      // Hiển thị loading indicator
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder:
+                            (context) =>
+                                Center(child: CircularProgressIndicator()),
+                      );
+
                       final updatedTask = _task!.copyWith(
                         title: title,
                         description: detail,
                       );
-                      context.read<TaskProvider>().updateTask(updatedTask);
+
+                      final success = await context
+                          .read<TaskProvider>()
+                          .updateTask(updatedTask);
+
+                      // Đóng loading dialog
                       Navigator.pop(context);
-                      ShowCustomSnackBar(
-                        context,
-                        message: "Save successfully",
-                        icon: Icons.check_circle,
-                        backgroundColor: AppColorsPath.green,
-                      );
+
+                      if (success) {
+                        // Hiển thị thông báo thành công trước
+                        ShowCustomSnackBar(
+                          context,
+                          message: "Cập nhật thành công",
+                          icon: Icons.check_circle,
+                          backgroundColor: AppColorsPath.green,
+                        );
+
+                        // Delay một chút để user thấy thông báo, sau đó quay lại
+                        await Future.delayed(Duration(milliseconds: 500));
+
+                        // Quay lại home screen
+                        Navigator.pop(
+                          context,
+                          true,
+                        ); // Return true để indicate success
+                      } else {
+                        final errorMessage =
+                            context.read<TaskProvider>().errorMessage;
+                        ShowCustomSnackBar(
+                          context,
+                          message: errorMessage ?? "Có lỗi xảy ra khi cập nhật",
+                          icon: Icons.error_outline,
+                          backgroundColor: AppColorsPath.red,
+                        );
+                      }
                     }
                   },
                   child: _buildButtonWidget(content: "Update"),
