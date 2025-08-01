@@ -83,7 +83,7 @@ class ApiService {
       );
       debugPrint('API Response Status Code (Put) : ${response.statusCode}');
       debugPrint('API Response Body (Put) : ${response.body}');
-      if (response.statusCode != 200) {
+      if (response.statusCode == 200) {
         throw Exception("Failed to update task");
       }
     } catch (e) {
