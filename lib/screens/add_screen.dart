@@ -26,7 +26,7 @@ class AddScreen extends StatelessWidget {
             AppTextField(label: 'Detail', controller: detailController),
             SizedBox(height: 54),
             GestureDetector(
-              onTap: () {
+              onTap: () async {
                 String title = titleController.text.trim();
                 String detail = detailController.text.trim();
                 if (title.isEmpty || detail.isEmpty) {
@@ -38,14 +38,28 @@ class AddScreen extends StatelessWidget {
                   );
                   return;
                 }
-                context.read<TaskProvider>().addTask(title, detail);
-                Navigator.pop(context);
-                showCustomSnackBar(
-                  context,
-                  message: "Lưu thành công",
-                  icon: Icons.check_circle,
-                  backgroundColor: AppColorsPath.green,
-                );
+
+                try {
+                  await context.read<TaskProvider>().addTask(title, detail);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    showCustomSnackBar(
+                      context,
+                      message: "Lưu thành công",
+                      icon: Icons.check_circle,
+                      backgroundColor: AppColorsPath.green,
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    showCustomSnackBar(
+                      context,
+                      message: "Lỗi khi thêm task: $e",
+                      icon: Icons.error_outline,
+                      backgroundColor: AppColorsPath.red,
+                    );
+                  }
+                }
               },
               child: _buildButtonWidget(context),
             ),

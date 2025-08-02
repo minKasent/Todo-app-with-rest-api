@@ -66,7 +66,7 @@ class _EditScreenState extends State<EditScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     String title = _titleController.text.trim();
                     String detail = _detailController.text.trim();
                     if (title.isEmpty || detail.isEmpty) {
@@ -79,18 +79,31 @@ class _EditScreenState extends State<EditScreen> {
                       return;
                     }
                     if (_task != null) {
-                      final updatedTask = _task!.copyWith(
-                        title: title,
-                        description: detail,
-                      );
-                      context.read<TaskProvider>().updateTask(updatedTask);
-                      Navigator.pop(context);
-                      showCustomSnackBar(
-                        context,
-                        message: "Save successfully",
-                        icon: Icons.check_circle,
-                        backgroundColor: AppColorsPath.green,
-                      );
+                      try {
+                        final updatedTask = _task!.copyWith(
+                          title: title,
+                          description: detail,
+                        );
+                        await context.read<TaskProvider>().updateTask(updatedTask);
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          showCustomSnackBar(
+                            context,
+                            message: "Save successfully",
+                            icon: Icons.check_circle,
+                            backgroundColor: AppColorsPath.green,
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          showCustomSnackBar(
+                            context,
+                            message: "Lỗi khi cập nhật task: $e",
+                            icon: Icons.error_outline,
+                            backgroundColor: AppColorsPath.red,
+                          );
+                        }
+                      }
                     }
                   },
                   child: _buildButtonWidget(content: "Update"),

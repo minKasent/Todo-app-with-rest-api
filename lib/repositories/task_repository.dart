@@ -51,8 +51,7 @@ class TaskRepository {
 
   Future<void> updateTask(Task task) async {
     try {
-      final apiTask = await _apiService.updateTask(task);
-      return apiTask;
+      await _apiService.updateTask(task);
     } catch (e) {
       throw Exception("Error in updateTask $e");
     }

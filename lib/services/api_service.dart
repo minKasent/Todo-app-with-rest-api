@@ -33,15 +33,14 @@ class ApiService {
           final List<dynamic> taskList =
               jsonResponse['data'] as List; // convert dynamic to List
           return taskList.map((taskJson) {
-            //
             // Add default fields if missing from API response
             final taskData = Map<String, dynamic>.from(taskJson);
 
             taskData['isLocalOnly'] = false;
             taskData['needsSync'] = false;
-            // gán vào model Task
+            // map model Task
             return Task.fromJson(taskData);
-          }).toList();
+          }).where((task) => task.id != null).toList(); // filter task id = null
         } else {
           throw Exception('Invalid API response format');
         }
@@ -63,10 +62,39 @@ class ApiService {
       );
       debugPrint('API Response Status Code (Post) : ${response.statusCode}');
       debugPrint('API Response Body (Post) : ${response.body}');
+
       if (response.statusCode == 201) {
-        return Task.fromJson(json.decode(response.body));
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+        // Check if response has expected structure
+        if (jsonResponse['status'] == 'success' && jsonResponse['data'] != null) {
+          final data = jsonResponse['data'];
+
+          // If API returns only ID
+          if (data is Map<String, dynamic> && data.containsKey('id')) {
+            return task.copyWith(
+              id: data['id'] as String,
+              isLocalOnly: false,
+              needsSync: false,
+            );
+          }
+          final taskData = Map<String, dynamic>.from(data);
+          if (taskData.containsKey('_id')) {
+            taskData['id'] = taskData['_id'];
+          }
+          taskData['isLocalOnly'] = false;
+          taskData['needsSync'] = false;
+          return Task.fromJson(taskData);
+        } else {
+          // create task with generated ID
+          return task.copyWith(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            isLocalOnly: false,
+            needsSync: false,
+          );
+        }
       } else {
-        throw Exception("Failed to add task");
+        throw Exception("Failed to add task - Status: ${response.statusCode}");
       }
     } catch (e) {
       debugPrint("Error adding task $e");
@@ -83,7 +111,7 @@ class ApiService {
       );
       debugPrint('API Response Status Code (Put) : ${response.statusCode}');
       debugPrint('API Response Body (Put) : ${response.body}');
-      if (response.statusCode == 200) {
+      if (response.statusCode != 200) {
         throw Exception("Failed to update task");
       }
     } catch (e) {
@@ -99,16 +127,13 @@ class ApiService {
         headers: _headers,
       );
       debugPrint('API Response Status Code (Delete) : ${response.statusCode}');
-      if (response.statusCode == 200 || response.statusCode == 204) {
+      if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-        if (jsonResponse['status'] == 'success') {
-          return;
-        } else {
+        if (jsonResponse['status'] != 'success') {
           throw Exception("Failed to delete task: ${jsonResponse['message']}");
         }
-      } else {
-        throw Exception("Failed to delete task");
+      } else if (response.statusCode != 204) {
+        throw Exception("Failed to delete task with status: ${response.statusCode}");
       }
     } catch (e) {
       debugPrint("Error deleting task $e");
