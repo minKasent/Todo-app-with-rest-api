@@ -77,26 +77,41 @@ class TaskProvider with ChangeNotifier {
 
   Future<void> addTask(String title, String description) async {
     try {
+      _clearError();
+      _setLoading(true);
+
       final newTask = await _taskRepository.addTask(
         Task(title: title, description: description, status: 'pendiente'),
       );
       _tasks.add(newTask);
       notifyListeners();
+
+      debugPrint("Task added successfully: ${newTask.title}");
     } catch (e) {
       debugPrint("Error in addTask $e");
+      _setError("Failed to add task: $e");
+    } finally {
+      _setLoading(false);
     }
   }
 
   Future<void> updateTask(Task task) async {
     try {
+      _clearError();
+      _setLoading(true);
+
       await _taskRepository.updateTask(task);
       final index = _tasks.indexWhere((element) => element.id == task.id);
       if (index != -1) {
         _tasks[index] = task;
         notifyListeners();
+        debugPrint("Task updated successfully: ${task.title}");
       }
     } catch (e) {
       debugPrint("Error in updateTask $e");
+      _setError("Failed to updateTask: $e");
+    } finally {
+      _setLoading(false);
     }
   }
 

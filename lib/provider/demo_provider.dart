@@ -9,7 +9,7 @@ class DemoProvider with ChangeNotifier {
   int get counter => _counter;
   int get age => _age;
 
-  /// setter
+
 
   void increment() {
     _counter++; // 1
