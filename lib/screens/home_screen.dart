@@ -208,6 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildListIconsActionWidget(Task task) {
     return [
+      /// Edit task
       _buildIconWidget(
         onTap: () {
           Navigator.pushNamed(
@@ -219,6 +220,8 @@ class _HomeScreenState extends State<HomeScreen> {
         imagePath: AppIconsPath.icPencil,
       ),
       SizedBox(width: 20),
+
+      /// Delete task
       _buildIconWidget(
         onTap: () {
           if (task.id == null) {
@@ -237,10 +240,13 @@ class _HomeScreenState extends State<HomeScreen> {
         imagePath: AppIconsPath.icTrash,
       ),
       SizedBox(width: 20),
+
+      /// Complete task
       _buildIconWidget(
+        /// TODO: Show cofirm complete dialog
         onTap: () {
-          final updatedTask = task.copyWith(status: 'completada');
-          context.read<TaskProvider>().updateTask(updatedTask);
+          final completedTask = task.copyWith(status: 'completada');
+          context.read<TaskProvider>().updateTask(completedTask);
         },
         imagePath: AppIconsPath.icCheckCircle,
       ),

@@ -11,6 +11,86 @@ class TaskRepository {
 
   Future<void> init() async {
     await _storageService.init();
+
+    ///
+    _setupConnectivityListener();
+  }
+
+  // Set up connectivity listener to trigger sync when online
+  void _setupConnectivityListener() {
+    _connectivity.onConnectivityChanged.listen((
+      List<ConnectivityResult> results,
+    ) async {
+      if (!results.contains(ConnectivityResult.none)) {
+        /// Sync with server
+        if (await hasPendingSyncOperation()) {
+          try {
+            await syncWithServer();
+          } catch (e) {
+            debugPrint("Error in syncWithServer $e");
+          }
+        }
+      }
+    });
+  }
+
+  // Check if there are pending sync operation
+  Future<bool> hasPendingSyncOperation() async {
+    final syncQueue = await _storageService.getSyncQueue();
+    return syncQueue.isNotEmpty;
+  }
+
+  /// Sync pending operations with server
+  Future<void> syncWithServer() async {
+    if (!await _isOnline()) {
+      throw Exception("No internet connection");
+    }
+
+    try {
+      final syncQueue = await _storageService.getSyncQueue();
+      if (syncQueue.isEmpty) {
+        debugPrint("Sync queue is empty");
+        return;
+      }
+
+      for (final item in syncQueue) {
+        final operation = item['operation'] as String;
+        final dynamic rawData = item['data'];
+        final timestamp = item['timestamp'] as int;
+
+        // Convert Map<dynamic, dynamic> to Map<String, dynamic>
+        final Map<String, dynamic> data = Map<String, dynamic>.from(rawData);
+
+        try {
+          /// Sync with operation create, update, delete
+          switch (operation) {
+            case 'create':
+              final task = Task.fromJson(data);
+              await _apiService.addTask(task);
+              break;
+
+            case 'update':
+              final task = Task.fromJson(data);
+              await _apiService.updateTask(task);
+              break;
+
+            case 'delete':
+              final taskId = data['id'] as String;
+              await _apiService.deleteTask(taskId);
+              break;
+          }
+
+          // Remove from sync queue after successful operation
+          await _storageService.removeFromSyncQueue(timestamp.toString());
+          debugPrint("Sync operation $operation successful");
+        } catch (e) {
+          debugPrint("Failed to sync operation $operation $e");
+        }
+      }
+    } catch (e) {
+      debugPrint("Error in syncWithServer $e");
+      throw Exception("Error in syncWithServer $e");
+    }
   }
 
   Future<List<Task>> getAllTasks() async {
@@ -42,8 +122,19 @@ class TaskRepository {
 
   Future<Task> addTask(Task task) async {
     try {
-      final apiTask = await _apiService.addTask(task);
-      return apiTask;
+      if (await _isOnline()) {
+        final apiTask = await _apiService.addTask(task);
+        await _storageService.saveTask(task);
+        return apiTask;
+      } else {
+        /// If offline, save to local storage and queue for sync
+        await _storageService.saveTask(task);
+        await _storageService.addToSyncQueue(
+          operation: 'create',
+          data: task.toJson(),
+        );
+        return task;
+      }
     } catch (e) {
       throw Exception("Error in addTask $e");
     }
@@ -51,15 +142,34 @@ class TaskRepository {
 
   Future<void> updateTask(Task task) async {
     try {
-      await _apiService.updateTask(task);
+      if (await _isOnline()) {
+        await _apiService.updateTask(task);
+        await _storageService.updateTask(task);
+      } else {
+        await _storageService.updateTask(task);
+        await _storageService.addToSyncQueue(
+          operation: 'update',
+          data: task.toJson(),
+        );
+      }
     } catch (e) {
       throw Exception("Error in updateTask $e");
     }
   }
 
+  /// Delete task from both API and local storage
   Future<void> deleteTask(String taskId) async {
     try {
-      await _apiService.deleteTask(taskId);
+      if (await _isOnline()) {
+        await _apiService.deleteTask(taskId);
+        await _storageService.deleteTask(taskId);
+      } else {
+        await _storageService.deleteTask(taskId);
+        await _storageService.addToSyncQueue(
+          operation: 'delete',
+          data: {'id': taskId},
+        );
+      }
     } catch (e) {
       throw Exception("Error in deleteTask $e");
     }
@@ -72,8 +182,10 @@ class TaskRepository {
         return false;
       }
 
+      return true;
+
       /// Double check with API
-      return await _apiService.isApiReachable();
+      /// return await _apiService.isApiReachable();
     } catch (e) {
       return false;
     }

@@ -90,7 +90,6 @@ class TaskProvider with ChangeNotifier {
     } catch (e) {
       debugPrint("Error in addTask $e");
       _setError("Failed to add task: $e");
-      rethrow; // Để UI có thể catch error
     } finally {
       _setLoading(false);
     }
@@ -110,8 +109,7 @@ class TaskProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint("Error in updateTask $e");
-      _setError("Failed to update task: $e");
-      rethrow; // Để UI có thể catch error
+      _setError("Failed to updateTask: $e");
     } finally {
       _setLoading(false);
     }

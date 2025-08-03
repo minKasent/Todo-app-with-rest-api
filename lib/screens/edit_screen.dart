@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todo_app_with_rest_api/components/app_button.dart';
 import 'package:todo_app_with_rest_api/components/app_text.dart';
 import 'package:todo_app_with_rest_api/components/app_text_field.dart';
 import 'package:todo_app_with_rest_api/components/app_text_style.dart';
@@ -20,10 +21,13 @@ class _EditScreenState extends State<EditScreen> {
   final _titleController = TextEditingController();
   final _detailController = TextEditingController();
   Task? _task;
+  double screenWidth = 0;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    screenWidth = MediaQuery.of(context).size.width;
+
     if (_task == null) {
       final args = ModalRoute.of(context)!.settings.arguments as Map?;
       if (args != null && args.containsKey('task')) {
@@ -65,54 +69,19 @@ class _EditScreenState extends State<EditScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                GestureDetector(
+                AppButton(
                   onTap: () async {
-                    String title = _titleController.text.trim();
-                    String detail = _detailController.text.trim();
-                    if (title.isEmpty || detail.isEmpty) {
-                      showCustomSnackBar(
-                        context,
-                        message: "No empty",
-                        icon: Icons.error_outline,
-                        backgroundColor: AppColorsPath.red,
-                      );
-                      return;
-                    }
-                    if (_task != null) {
-                      try {
-                        final updatedTask = _task!.copyWith(
-                          title: title,
-                          description: detail,
-                        );
-                        await context.read<TaskProvider>().updateTask(updatedTask);
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                          showCustomSnackBar(
-                            context,
-                            message: "Save successfully",
-                            icon: Icons.check_circle,
-                            backgroundColor: AppColorsPath.green,
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          showCustomSnackBar(
-                            context,
-                            message: "Lỗi khi cập nhật task: $e",
-                            icon: Icons.error_outline,
-                            backgroundColor: AppColorsPath.red,
-                          );
-                        }
-                      }
-                    }
+                    await _updateTask(context);
                   },
-                  child: _buildButtonWidget(content: "Update"),
+                  content: "Update",
+                  width: (screenWidth - 14 * 2 - 46) / 2,
                 ),
-                GestureDetector(
+                AppButton(
                   onTap: () {
                     Navigator.pop(context);
                   },
-                  child: _buildButtonWidget(content: "Cancel"),
+                  content: "Cancel",
+                  width: (screenWidth - 14 * 2 - 46) / 2,
                 ),
               ],
             ),
@@ -122,20 +91,41 @@ class _EditScreenState extends State<EditScreen> {
     );
   }
 
-  Container _buildButtonWidget({required String content}) {
-    return Container(
-      width: 170,
-      height: 70,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color: AppColorsPath.purple,
-      ),
-      child: Center(
-        child: AppText(
-          content: content,
-          style: AppTextStyle.text24SemiBold.copyWith(fontSize: 20),
-        ),
-      ),
-    );
+  Future<void> _updateTask(BuildContext context) async {
+    String title = _titleController.text.trim();
+    String detail = _detailController.text.trim();
+    if (title.isEmpty || detail.isEmpty) {
+      showCustomSnackBar(
+        context,
+        message: "Title and detail are required",
+        icon: Icons.error_outline,
+        backgroundColor: AppColorsPath.red,
+      );
+      return;
+    }
+    if (_task != null) {
+      try {
+        final updatedTask = _task!.copyWith(title: title, description: detail);
+        await context.read<TaskProvider>().updateTask(updatedTask);
+        if (context.mounted) {
+          Navigator.pop(context);
+          showCustomSnackBar(
+            context,
+            message: "Save successfully",
+            icon: Icons.check_circle,
+            backgroundColor: AppColorsPath.green,
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          showCustomSnackBar(
+            context,
+            message: "Lỗi khi cập nhật task: $e",
+            icon: Icons.error_outline,
+            backgroundColor: AppColorsPath.red,
+          );
+        }
+      }
+    }
   }
 }
