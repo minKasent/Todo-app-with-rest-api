@@ -71,7 +71,7 @@ class StorageService {
       'operation': operation, // operation: 'create', 'update', 'delete'
       'data': data, // Task Data
       'timestamp':
-          DateTime.now().millisecondsSinceEpoch, // Time to save task into queue
+          DateTime.now().millisecondsSinceEpoch, //(int) Time to save task into queue
     };
 
     /// Save data to _syncQueueBox
@@ -82,12 +82,18 @@ class StorageService {
 
   /// remove from sync queue
   Future<void> removeFromSyncQueue(String timestamp) async {
+    // Convert timestamp string to int for comparison
+    final timestampInt = int.tryParse(timestamp);
+    if (timestampInt == null) {
+      debugPrint('Invalid timestamp format: $timestamp');
+      return;
+    }
+
     // Find the item with the matching timestamp
-    final keys =
-        _syncQueueBox.keys.where((key) {
-          final item = _syncQueueBox.get(key);
-          return item != null && item['timestamp'] == timestamp;
-        }).toList();
+    final keys = _syncQueueBox.keys.where((key) {
+      final item = _syncQueueBox.get(key);
+      return item != null && item['timestamp'] == timestampInt;
+    }).toList();
 
     // Delete all matching items
     for (final key in keys) {
