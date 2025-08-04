@@ -67,7 +67,7 @@ Task _$TaskFromJson(Map<String, dynamic> json) => Task(
       isLocalOnly: json['isLocalOnly'] as bool? ?? false,
       needsSync: json['needsSync'] as bool? ?? false,
     );
-
+    // model Task                                       // JsonString
 Map<String, dynamic> _$TaskToJson(Task instance) => <String, dynamic>{
       'id': instance.id,
       'title': instance.title,

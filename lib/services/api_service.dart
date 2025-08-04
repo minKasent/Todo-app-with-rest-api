@@ -19,7 +19,9 @@ class ApiService {
   // Get All Tasks
   Future<List<Task>> getTasks() async {
     try {
-      final response = await http.get(Uri.parse(_baseUrl), headers: _headers);
+      final response = await http.get(
+          Uri.parse(_baseUrl),
+          headers: _headers);
       debugPrint('API Response Status Code: ${response.statusCode}');
       debugPrint('API Response Body: ${response.body}');
 
@@ -31,19 +33,20 @@ class ApiService {
         if (jsonResponse['status'] == 'success' &&
             jsonResponse['data'] != null) {
           final List<dynamic> taskList =
-              jsonResponse['data'] as List; // convert dynamic to List
+              jsonResponse['data']
+                  as List; // convert Map<String,dynamic> to List
           return taskList
               .map((taskJson) {
+                // .map return iterable<Task>
                 // Add default fields if missing from API response
                 final taskData = Map<String, dynamic>.from(taskJson);
-
                 taskData['isLocalOnly'] = false;
                 taskData['needsSync'] = false;
                 // map model Task
                 return Task.fromJson(taskData);
               })
-              .where((task) => task.id != null)
-              .toList(); // filter task id = null
+              .where((task) => task.id != null) // filter task id = null
+              .toList(); // convert iterable<Task> to List<Task>
         } else {
           throw Exception('Invalid API response format');
         }
@@ -72,12 +75,10 @@ class ApiService {
         // Check if response has expected structure
         if (jsonResponse['status'] == 'success' &&
             jsonResponse['data'] != null) {
-          final data = jsonResponse['data'];
-          return task.copyWith(
-            id: data['id'] as String,
-            isLocalOnly: false,
-            needsSync: false,
-          );
+          final taskData = Map<String, dynamic>.from(jsonResponse['data']);
+          taskData['isLocalOnly'] = false;
+          taskData['needsSync'] = false;
+          return Task.fromJson(taskData);
         } else {
           throw Exception('Invalid API response format');
         }

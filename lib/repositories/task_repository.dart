@@ -11,8 +11,6 @@ class TaskRepository {
 
   Future<void> init() async {
     await _storageService.init();
-
-    ///
     _setupConnectivityListener();
   }
 
