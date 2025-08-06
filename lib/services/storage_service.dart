@@ -21,7 +21,7 @@ class StorageService {
 
   Future<void> saveAllTasks(List<Task> tasks) async {
     debugPrint('Saving ${tasks.length} tasks to local storage...');
-
+    //key   value
     final Map<String, Task> taskMap = {};
     for (final task in tasks) {
       final key = task.id ?? DateTime.now().millisecondsSinceEpoch.toString();
@@ -33,7 +33,7 @@ class StorageService {
   }
 
   Future<List<Task>> getAllTasks() async {
-    final tasks = _taskBox.values.toList();
+    final tasks = _taskBox.values.toList(); // get all values from the box
     debugPrint('Retrieved ${tasks.length} tasks from local storage');
     return tasks;
   }
@@ -63,7 +63,7 @@ class StorageService {
 
   // Sync queue operations for offline functionality
   // create, update, delete
-  Future<void> addToSyncQueue({
+  Future<void> addToSyncQueueBox({
     required String operation,
     required Map<String, dynamic> data,
   }) async {
@@ -71,7 +71,8 @@ class StorageService {
       'operation': operation, // operation: 'create', 'update', 'delete'
       'data': data, // Task Data
       'timestamp':
-          DateTime.now().millisecondsSinceEpoch, //(int) Time to save task into queue
+          DateTime.now()
+              .millisecondsSinceEpoch, //(int) Time to save task into queue
     };
 
     /// Save data to _syncQueueBox
@@ -81,7 +82,7 @@ class StorageService {
   }
 
   /// remove from sync queue
-  Future<void> removeFromSyncQueue(String timestamp) async {
+  Future<void> removeFromSyncQueueBox(String timestamp) async {
     // Convert timestamp string to int for comparison
     final timestampInt = int.tryParse(timestamp);
     if (timestampInt == null) {
@@ -90,10 +91,11 @@ class StorageService {
     }
 
     // Find the item with the matching timestamp
-    final keys = _syncQueueBox.keys.where((key) {
-      final item = _syncQueueBox.get(key);
-      return item != null && item['timestamp'] == timestampInt;
-    }).toList();
+    final keys =
+        _syncQueueBox.keys.where((dynamic key) {
+          final item = _syncQueueBox.get(key);
+          return item != null && item['timestamp'] == timestampInt;
+        }).toList();
 
     // Delete all matching items
     for (final key in keys) {
@@ -103,7 +105,9 @@ class StorageService {
   }
 
   /// Get sync queue
-  Future<List<Map<String, dynamic>>> getSyncQueue() async {
+  Future<List<Map<String, dynamic>>> getSyncQueueBox() async {
+    //item sẽ đại diện cho từng giá trị phần tử ,
+    // .map sẽ duyệt qua từng item đồng thời chuyển đổi các item thành Map<String, dynamic>
     return _syncQueueBox.values.map<Map<String, dynamic>>((item) {
       final map = <String, dynamic>{};
       (item).forEach((key, value) {

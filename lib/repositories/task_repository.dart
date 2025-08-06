@@ -34,7 +34,7 @@ class TaskRepository {
 
   // Check if there are pending sync operation
   Future<bool> hasPendingSyncOperation() async {
-    final syncQueue = await _storageService.getSyncQueue();
+    final syncQueue = await _storageService.getSyncQueueBox();
     return syncQueue.isNotEmpty;
   }
 
@@ -45,7 +45,7 @@ class TaskRepository {
     }
 
     try {
-      final syncQueue = await _storageService.getSyncQueue();
+      final syncQueue = await _storageService.getSyncQueueBox();
       if (syncQueue.isEmpty) {
         debugPrint("Sync queue is empty");
         return;
@@ -79,7 +79,7 @@ class TaskRepository {
           }
 
           // Remove from sync queue after successful operation
-          await _storageService.removeFromSyncQueue(timestamp.toString());
+          await _storageService.removeFromSyncQueueBox(timestamp.toString());
           debugPrint("Sync operation $operation successful");
         } catch (e) {
           debugPrint("Failed to sync operation $operation $e");
@@ -127,7 +127,7 @@ class TaskRepository {
       } else {
         /// If offline, save to local storage and queue for sync
         await _storageService.saveTask(task);
-        await _storageService.addToSyncQueue(
+        await _storageService.addToSyncQueueBox(
           operation: 'create',
           data: task.toJson(),
         );
@@ -145,7 +145,7 @@ class TaskRepository {
         await _storageService.updateTask(task);
       } else {
         await _storageService.updateTask(task);
-        await _storageService.addToSyncQueue(
+        await _storageService.addToSyncQueueBox(
           operation: 'update',
           data: task.toJson(),
         );
@@ -163,7 +163,7 @@ class TaskRepository {
         await _storageService.deleteTask(taskId);
       } else {
         await _storageService.deleteTask(taskId);
-        await _storageService.addToSyncQueue(
+        await _storageService.addToSyncQueueBox(
           operation: 'delete',
           data: {'id': taskId},
         );
