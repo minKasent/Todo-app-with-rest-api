@@ -17,7 +17,7 @@ class ApiService {
   };
 
   // Get All Tasks
-  Future<List<Task>> getTasks() async {
+  Future<List<Task>> getAllTasks() async {
     try {
       final response = await http.get(
           Uri.parse(_baseUrl),
@@ -34,10 +34,9 @@ class ApiService {
             jsonResponse['data'] != null) {
           final List<dynamic> taskList =
               jsonResponse['data']
-                  as List; // convert Map<String,dynamic> to List
+                  as List; // convert dynamic to List
           return taskList
-              .map((taskJson) {
-                // .map return iterable<Task>
+              .map((taskJson) {// .map return iterable<Task>
                 // Add default fields if missing from API response
                 final taskData = Map<String, dynamic>.from(taskJson);
                 taskData['isLocalOnly'] = false;
@@ -137,7 +136,6 @@ class ApiService {
       final response = await http
           .get(Uri.parse(_baseUrl), headers: _headers)
           .timeout(const Duration(seconds: 5));
-
       return response.statusCode == 200;
     } catch (e) {
       debugPrint("Api is not reachable $e");

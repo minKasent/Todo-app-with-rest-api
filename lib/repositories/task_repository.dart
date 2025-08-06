@@ -96,7 +96,7 @@ class TaskRepository {
       // Always try to get fresh data from API if online
       if (await _isOnline()) {
         try {
-          final apiTasks = await _apiService.getTasks();
+          final apiTasks = await _apiService.getAllTasks();
 
           // Save API tasks to local storage
           await _storageService.clearAllTasks();
