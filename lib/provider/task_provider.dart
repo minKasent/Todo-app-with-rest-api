@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/widgets.dart';
 import 'package:todo_app_with_rest_api/models/task.dart';
 import 'package:todo_app_with_rest_api/repositories/task_repository.dart';
@@ -133,8 +131,8 @@ class TaskProvider with ChangeNotifier {
   }
 
   void _setLoading(bool loading) {
-    if (_isLoading != loading) {
-      _isLoading = loading;
+    if (_isLoading != loading) {// kiểm tra xem trạng thái loading có thay đổi hay không
+      _isLoading = loading; // nếu có thì cập nhật trạng thái
       debugPrint('Loading state changed: $loading');
       notifyListeners();
     }
@@ -147,8 +145,8 @@ class TaskProvider with ChangeNotifier {
   }
 
   void _clearError() {
-    if (_error != null) {
-      _error = null;
+    if (_error != null) { // check xem có lỗi hay không
+      _error = null; // xoá lỗi
       debugPrint("Error cleared");
       notifyListeners();
     }
