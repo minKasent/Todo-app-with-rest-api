@@ -13,7 +13,7 @@ class DemoProvider with ChangeNotifier {
 
   void increment() {
     _counter++; // 1
-    print("counter $_counter");
+    // print("counter $_counter");
 
     notifyListeners(); // push noti
   }
